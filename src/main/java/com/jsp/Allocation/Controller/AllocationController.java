@@ -5,20 +5,25 @@ import com.jsp.Allocation.Dto.AppResponseDto;
 import com.jsp.Allocation.Service.AllocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 public class AllocationController {
     @Autowired
     AllocationService allocationService;
+
     @PostMapping("/createAllocation")
     public @ResponseBody AppResponseDto getResponse(@RequestBody List<Map<String, Object>> grantList) {
 
         return allocationService.processAllocation(grantList);
+    }
+
+    @RequestMapping(value = "/getByPlanId")
+    public AppResponseDto getAllGrantsByPlanUd(@RequestParam("planId") BigInteger planId) {
+        return allocationService.processGetAllGrantsByPlanUd(planId);
     }
 }

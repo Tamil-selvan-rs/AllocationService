@@ -64,6 +64,11 @@ public class OldService implements AllocationService {
         }
     }
 
+    @Override
+    public AppResponseDto processGetAllGrantsByPlanUd(BigInteger planService) {
+        return null;
+    }
+
     private BigInteger generateAltKey() {
         long value = Math.abs(ThreadLocalRandom.current().nextLong());
         return BigInteger.valueOf(value);

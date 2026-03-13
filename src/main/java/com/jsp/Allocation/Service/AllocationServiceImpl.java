@@ -4,6 +4,7 @@ import com.jsp.Allocation.Dto.AppResponseDto;
 import com.jsp.Allocation.Entity.AllocationEntity;
 import com.jsp.Allocation.Repository.AllocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -20,6 +21,8 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Autowired
     private AllocationRepository repository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public AppResponseDto processAllocation(List<Map<String, Object>> grantList) {
@@ -56,5 +59,15 @@ public class AllocationServiceImpl implements AllocationService {
         return BigInteger.valueOf(value);
     }
 
+    @Override
+    public AppResponseDto processGetAllGrantsByPlanUd(BigInteger planId) {
+        try {
+            String sql = "SELECT g.*, sum(a.allocation_number) AS allocation_count FROM  allocation_master a LEFT OUTER JOIN emp_table_master g ON a.grant_id = g.alt_key WHERE g.plan_id = ? AND a.status = 'APPROVED' GROUP BY g.alt_key";
+            List<Map<String, Object>> byPlanId = jdbcTemplate.queryForList(sql, planId);
+            return new AppResponseDto("200",null,"success",byPlanId.isEmpty() ? "this planId not approved yet" : byPlanId );
+        } catch (Exception e) {
+            return new AppResponseDto("400", e.getMessage(), "Failed", null);
+        }
+    }
 
 }
