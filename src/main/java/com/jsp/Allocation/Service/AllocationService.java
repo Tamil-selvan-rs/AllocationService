@@ -9,4 +9,5 @@ import java.util.Map;
 public interface AllocationService {
     AppResponseDto processAllocation(List<Map<String, Object>> grantList);
     AppResponseDto processGetAllGrantsByPlanUd(BigInteger planService);
+    void init();
 }

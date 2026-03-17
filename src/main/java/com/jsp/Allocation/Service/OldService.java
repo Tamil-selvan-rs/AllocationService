@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class OldService implements AllocationService {
+public abstract class OldService implements AllocationService {
 
     private AllocationRepository repository;
 
