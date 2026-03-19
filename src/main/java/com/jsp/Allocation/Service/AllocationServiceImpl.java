@@ -41,14 +41,14 @@ public class AllocationServiceImpl implements AllocationService {
 
             List<AllocationEntity> list = grantList.stream().flatMap(map -> {
                 BigInteger frequency = (map.get("frequency") != null) ? new BigInteger(map.get("frequency") + "") : new BigInteger("5");
-                LocalDate date = Instant.parse(map.get("grantDate").toString())
+                LocalDate date =Instant.parse(map.get("grantDate").toString())
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
                 BigInteger grantNumber = new BigInteger(map.get("grantNumber").toString());
                 BigInteger altKey = new BigInteger(map.get("altKey").toString());
                 return IntStream.range(0, frequency.intValue()).mapToObj(i -> {
                     AllocationEntity allocationEntity = new AllocationEntity();
-                    allocationEntity.setStatus("PENDING");
+                    allocationEntity.setStatus("APPROVED");
                     BigDecimal allocationValue = new BigDecimal(grantNumber)
                             .divide(new BigDecimal(frequency), RoundingMode.HALF_UP);
                     allocationEntity.setAllocationNumber(allocationValue.toBigInteger());
@@ -79,7 +79,7 @@ public class AllocationServiceImpl implements AllocationService {
     @Override
     public AppResponseDto processGetAllGrantsByPlanUd(BigInteger planId) {
         try {
-            String sql = "SELECT g.*, sum(a.allocation_number) AS allocation_count FROM  allocation_master a LEFT OUTER JOIN emp_table_master g ON a.grant_id = g.alt_key WHERE g.plan_id = ? AND a.status = 'APPROVED' GROUP BY g.alt_key";
+            String sql = "SELECT g.*, sum(a.allocation_number) AS allocation_count FROM  allocation_master a LEFT OUTER JOIN grant_master g ON a.grant_id = g.alt_key WHERE g.plan_id = ? AND a.status = 'APPROVED' GROUP BY g.alt_key";
             List<Map<String, Object>> byPlanId = jdbcTemplate.queryForList(sql, planId);
             return new AppResponseDto("200", null, "success", byPlanId.isEmpty() ? "this planId not approved yet" : byPlanId);
         } catch (Exception e) {
@@ -118,12 +118,13 @@ public class AllocationServiceImpl implements AllocationService {
                 );
         return response.getBody().getData();
     }
+
     private void processApproveGrants(List<Map<String, Object>> grantList) {
         List<BigInteger> altKeys = grantList.stream()
                 .map(map -> new BigInteger(map.get("altKey").toString()))
                 .distinct()
                 .toList();
-        String url ="http://localhost:8080/acceptGrants";
+        String url = "http://localhost:8080/acceptGrants";
         HttpEntity<List<BigInteger>> request = new HttpEntity<>(altKeys);
 
         restTemplate.exchange(url, HttpMethod.PUT, request, Void.class);
